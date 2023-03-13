@@ -1,16 +1,17 @@
-# This is a sample Python script.
+import os
+import expenses
+import splitwise
 
-# Press ⌃R to execute it or replace it with your code.
-# Press Double ⇧ to search everywhere for classes, files, tool windows, actions, and settings.
-
-
-def print_hi(name):
-    # Use a breakpoint in the code line below to debug your script.
-    print(f'Hi, {name}')  # Press ⌘F8 to toggle the breakpoint.
-
-
-# Press the green button in the gutter to run the script.
+# Script to get your expenses from CSV file, upload to splitwise and generate CSV file with the modified expenses
+# The file path is relative to the current working directory of the Python script.
+# When you open a file in Python using a relative file path (as opposed to an absolute file path)
+# Python looks for the file in the current working directory.
 if __name__ == '__main__':
-    print_hi('PyCharm')
+    csv_read_file = f"{os.environ['CSV_READ_PATH']}{os.environ['CSV_READ_FILE_NAME']}"
+    expenses_list = expenses.filter_and_calculate_expenses_from_csv(csv_read_file)
+    csv_write_file = f"{os.environ['CSV_READ_PATH']}Modified_{os.environ['CSV_READ_FILE_NAME']}"
+    expenses.generate_expense_csv(expenses_list, csv_write_file)
 
-# See PyCharm help at https://www.jetbrains.com/help/pycharm/
+    for expense in expenses_list:
+        splitwise_expense = splitwise.format_expense_for_splitwise_group(expense, os.environ['SPLITWISE_GROUP_ID'])
+        splitwise.send_splitwise_expense_request(splitwise_expense)
