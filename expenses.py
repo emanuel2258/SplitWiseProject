@@ -31,7 +31,7 @@ def calculate_expense_amount(expense):
     if expense['Category'] in {'Restaurants'} or (
             expense['Description'] in {'Amazon'} and expense['Category'] in {'General Merchandise'}):
         amount = float(expense['Amount']) * .95
-    elif expense['Category'] in {'Groceries'}:
+    elif expense['Category'] in {'Groceries'} and expense['Description'] not in {'Costco'}:
         amount = float(expense['Amount']) * .97
     else:
         amount = float(expense['Amount']) * .98

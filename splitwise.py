@@ -2,7 +2,7 @@ import requests
 import os
 
 
-# Mathod to generate the body I will send to splitwise
+# Method to generate the body I will send to splitwise
 # I got the body format here https://dev.splitwise.com/#tag/expenses/paths/~1create_expense/post
 def format_expense_for_splitwise_group(expense, group_id):
     body = {
