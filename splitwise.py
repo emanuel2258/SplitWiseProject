@@ -30,8 +30,11 @@ def send_splitwise_expense_request(splitwise_expense):
         resp = requests.post(url, headers=request_header, data=splitwise_expense)
         resp.raise_for_status()
     except Exception as e:
-        print(f'ERROR: Failed to send the information to splitwise: {e}')
+        print(f'ERROR: Failed to send the information for {splitwise_expense["description"]} to splitwise: {e}')
         return None
-    print(
-        f"Was able to send request to create expense {splitwise_expense['description']} with amount {splitwise_expense['cost']}")
+    if 'expenses' not in resp.content or len(resp.content['expenses']) == 0:
+        print(f'ERROR: Failed to send the information for {splitwise_expense["description"]} '
+              f'to splitwise, this is the error from splitwise {resp.content["errors"]}')
+        return None
+    print(f"Was able to send request to create expense {splitwise_expense['description']} with amount {splitwise_expense['cost']}")
     return resp

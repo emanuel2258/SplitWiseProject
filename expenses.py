@@ -31,7 +31,7 @@ def calculate_expense_amount(expense):
     if expense['Category'] in {'Restaurants'} or (
             expense['Description'] in {'Amazon'} and expense['Category'] in {'General Merchandise'}):
         amount = float(expense['Amount']) * .95
-    elif expense['Category'] in {'Groceries'} and expense['Description'] not in {'Costco'}:
+    elif expense['Category'] in {'Groceries'}:
         amount = float(expense['Amount']) * .97
     else:
         amount = float(expense['Amount']) * .98
@@ -40,7 +40,7 @@ def calculate_expense_amount(expense):
 
 # Method to check if the expense should be included in splitwise
 def expense_should_count_check(expense):
-    if expense['Category'] in {'Credit Card Payments', 'Transfers', 'Refunds & Reimbursements', 'Clothing/Shoes'}:
+    if expense['Category'] in {'Credit Card Payments', 'Transfers', 'Refunds & Reimbursements', 'Clothing/Shoes', 'Personal Care', 'Telephone'}:
         return False
     elif expense['Description'] in {'At&t', 'Lady Janes', }:
         return False
