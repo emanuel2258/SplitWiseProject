@@ -40,11 +40,10 @@ def calculate_expense_amount(expense):
 
 # Method to check if the expense should be included in splitwise
 def expense_should_count_check(expense):
-    if expense['Category'] in {'Credit Card Payments', 'Transfers', 'Refunds & Reimbursements', 'Clothing/Shoes', 'Personal Care', 'Telephone'}:
-        return False
-    elif expense['Description'] in {'At&t', 'Lady Janes', }:
-        return False
-    return True
+    if expense['Category'] not in {'Credit Card Payments', 'Transfers', 'Refunds & Reimbursements', 'Clothing/Shoes', 'Telephone'} and \
+            expense['Description'] not in {'At&t', 'Lady Janes'}:
+        return True
+    return False
 
 
 # Method to generate the JSON format for the expense
