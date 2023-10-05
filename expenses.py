@@ -28,11 +28,44 @@ def filter_and_calculate_expenses_from_csv(file_path):
 
 # Method to determine the amount of the expense I should count, since we have cashback I substract that based on the type of expense
 def calculate_expense_amount(expense):
-    if expense['Category'] in {'Restaurants'} or (
-            expense['Description'] in {'Amazon'} and expense['Category'] in {'General Merchandise'}):
-        amount = float(expense['Amount']) * .95
-    elif expense['Category'] in {'Groceries'}:
-        amount = float(expense['Amount']) * .97
+    cards_category_cashback = {
+        "Savorone - Ending in 9209": {
+            "Restaurants": .03,
+            "Groceries": .03
+        },
+        "Customized Cash Rewards Visa Signature - Ending in 3445": {
+            "Groceries": .03,
+            "Online": .03
+        },
+        "Citi Custom Cash Card - Ending in 9673": {
+            "Restaurants": .05
+        },
+        "Credit Card - Ending in 7980": {
+            "Amazon": .05
+        },
+        "Discover It Card - Ending in 7693": {
+            "Gasoline/Fuel": .05
+        },
+        "Credit Card - Ending in 8642": {
+            "Gasoline/Fuel": .05
+        },
+        "Citi Double Cash Card - Ending in 4252": {
+            "*": .02
+        }
+
+    }
+    # if expense['Category'] in {'Restaurants'} or (
+    #         expense['Description'] in {'Amazon'} and expense['Category'] in {'General Merchandise'}):
+    #     amount = float(expense['Amount']) * .95
+    # elif expense['Category'] in {'Groceries'}:
+    #     amount = float(expense['Amount']) * .97
+    # else:
+    #     amount = float(expense['Amount']) * .98
+
+    card_categories = cards_category_cashback[expense['Account']]
+    if expense['Category'] in card_categories:
+        cashback = card_categories[expense['Category']]
+        amount = float(expense['Amount']) * float(1-cashback)
     else:
         amount = float(expense['Amount']) * .98
     return str(abs(round(amount, 2)))
@@ -40,8 +73,9 @@ def calculate_expense_amount(expense):
 
 # Method to check if the expense should be included in splitwise
 def expense_should_count_check(expense):
-    if expense['Category'] not in {'Credit Card Payments', 'Transfers', 'Refunds & Reimbursements', 'Clothing/Shoes', 'Telephone'} and \
-            expense['Description'] not in {'At&t', 'Lady Janes'}:
+    if expense['Category'] not in {'Credit Card Payments', 'Transfers', 'Refunds & Reimbursements', 'Clothing/Shoes',
+                                   'Telephone'} and \
+            expense['Description'] not in {'At&t', 'Lady Janes'} and float(expense['Amount']) < 0:
         return True
     return False
 
