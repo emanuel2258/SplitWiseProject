@@ -2,7 +2,8 @@ import csv
 from typing import List
 
 
-# Method to go through the csv file that contains the expenses and extract a JSON list that contains the formated expenses
+# Method to go through the csv file that contains the expenses
+# and extract a JSON list that contains the formatted expenses
 def filter_and_calculate_expenses_from_csv(file_path):
     expenses = []
     try:
@@ -26,7 +27,8 @@ def filter_and_calculate_expenses_from_csv(file_path):
     return expenses
 
 
-# Method to determine the amount of the expense I should count, since we have cashback I substract that based on the type of expense
+# Method to determine the amount of the expense I should count,
+# since I have cashback I subtract that based on the type of expense or type of card
 def calculate_expense_amount(expense):
     cards_category_cashback = {
         "Savorone - Ending in 9209": {
@@ -34,48 +36,50 @@ def calculate_expense_amount(expense):
             "Groceries": .03
         },
         "Customized Cash Rewards Visa Signature - Ending in 3445": {
-            "Groceries": .03,
+            "Groceries": .02,
             "Online": .03
         },
         "Citi Custom Cash Card - Ending in 9673": {
-            "Restaurants": .05
-        },
-        "Credit Card - Ending in 7980": {
-            "Amazon": .05
+            "Groceries": .05
         },
         "Discover It Card - Ending in 7693": {
-            "Gasoline/Fuel": .05
+            "Restaurants": .05
         },
         "Credit Card - Ending in 8642": {
-            "Gasoline/Fuel": .05
+            "Groceries": .05
+        },
+        "Credit Card - Ending in 7980": {
+            "*": .05
         },
         "Citi Double Cash Card - Ending in 4252": {
             "*": .02
         }
 
     }
-    # if expense['Category'] in {'Restaurants'} or (
-    #         expense['Description'] in {'Amazon'} and expense['Category'] in {'General Merchandise'}):
+    # card_categories = cards_category_cashback[expense['Account']]
+    # if "Amazon" in expense['Description']:
     #     amount = float(expense['Amount']) * .95
-    # elif expense['Category'] in {'Groceries'}:
-    #     amount = float(expense['Amount']) * .97
+    # elif expense['Category'] in card_categories:
+    #     cashback = card_categories[expense['Category']]
+    #     amount = float(expense['Amount']) * float(1-cashback)
     # else:
     #     amount = float(expense['Amount']) * .98
-
-    card_categories = cards_category_cashback[expense['Account']]
-    if expense['Category'] in card_categories:
-        cashback = card_categories[expense['Category']]
-        amount = float(expense['Amount']) * float(1-cashback)
-    else:
-        amount = float(expense['Amount']) * .98
+    if expense['Account'] in cards_category_cashback:
+        card_categories = cards_category_cashback[expense['Account']]
+        if "*" in card_categories:
+            cashback = card_categories['*']
+        elif expense['Category'] in card_categories:
+            cashback = card_categories[expense['Category']]
+        else:
+            cashback = .01
+        amount = float(expense['Amount']) * float(1 - cashback)
     return str(abs(round(amount, 2)))
 
 
 # Method to check if the expense should be included in splitwise
 def expense_should_count_check(expense):
     if expense['Category'] not in {'Credit Card Payments', 'Transfers', 'Refunds & Reimbursements', 'Clothing/Shoes',
-                                   'Telephone'} and \
-            expense['Description'] not in {'At&t', 'Lady Janes'} and float(expense['Amount']) < 0:
+                                   'Telephone'} and float(expense['Amount']) < 0:
         return True
     return False
 
@@ -112,3 +116,4 @@ def generate_expense_csv(expenses, file_path):
                 })
     except FileNotFoundError:
         print(f"File not found, file path {file_path}")
+

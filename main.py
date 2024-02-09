@@ -9,7 +9,7 @@ import splitwise
 if __name__ == '__main__':
     csv_read_file = f"{os.environ['CSV_READ_PATH']}{os.environ['CSV_READ_FILE_NAME']}"
     expenses_list = expenses.filter_and_calculate_expenses_from_csv(csv_read_file)
-    csv_write_file = f"{os.environ['CSV_READ_PATH']}Modified_{os.environ['CSV_READ_FILE_NAME']}"
+    csv_write_file = f"{os.environ['CSV_WRITE_PATH']}Modified_{os.environ['CSV_READ_FILE_NAME']}"
     expenses.generate_expense_csv(expenses_list, csv_write_file)
     for expense in expenses_list:
         splitwise_expense = splitwise.format_expense_for_splitwise_group(expense, os.environ['SPLITWISE_GROUP_ID'])
