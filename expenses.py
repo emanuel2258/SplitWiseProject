@@ -30,6 +30,7 @@ def filter_and_calculate_expenses_from_csv(file_path):
 # Method to determine the amount of the expense I should count,
 # since I have cashback I subtract that based on the type of expense or type of card
 def calculate_expense_amount(expense):
+    amount = float(expense['Amount'])
     cards_category_cashback = {
         "Savorone - Ending in 9209": {
             "Restaurants": .03,
@@ -43,12 +44,13 @@ def calculate_expense_amount(expense):
             "Groceries": .05
         },
         "Discover It Card - Ending in 7693": {
+            "Home Maintenance": .05,
+            "Home Improvement": .05
+        },
+        "Chase Freedom- Ending in 8642": {
             "Restaurants": .05
         },
-        "Credit Card - Ending in 8642": {
-            "Groceries": .05
-        },
-        "Credit Card - Ending in 7980": {
+        "Amazon Credit Card - Ending in 7980": {
             "*": .05
         },
         "Citi Double Cash Card - Ending in 4252": {
@@ -56,14 +58,6 @@ def calculate_expense_amount(expense):
         }
 
     }
-    # card_categories = cards_category_cashback[expense['Account']]
-    # if "Amazon" in expense['Description']:
-    #     amount = float(expense['Amount']) * .95
-    # elif expense['Category'] in card_categories:
-    #     cashback = card_categories[expense['Category']]
-    #     amount = float(expense['Amount']) * float(1-cashback)
-    # else:
-    #     amount = float(expense['Amount']) * .98
     if expense['Account'] in cards_category_cashback:
         card_categories = cards_category_cashback[expense['Account']]
         if "*" in card_categories:
@@ -79,7 +73,7 @@ def calculate_expense_amount(expense):
 # Method to check if the expense should be included in splitwise
 def expense_should_count_check(expense):
     if expense['Category'] not in {'Credit Card Payments', 'Transfers', 'Refunds & Reimbursements', 'Clothing/Shoes',
-                                   'Telephone'} and float(expense['Amount']) < 0:
+                                   'Telephone', 'Rewards'} and float(expense['Amount']) < 0:
         return True
     return False
 
