@@ -1,5 +1,6 @@
 import csv
 from typing import List
+from datetime import datetime
 
 
 # Method to go through the csv file that contains the expenses
@@ -32,28 +33,38 @@ def filter_and_calculate_expenses_from_csv(file_path):
 def calculate_expense_amount(expense):
     amount = float(expense['Amount'])
     cards_category_cashback = {
-        "Savorone - Ending in 9209": {
+        "Savor - Ending in 9209": {
             "Restaurants": .03,
-            "Groceries": .03
+            "Groceries": .03,
+            "Entertainment": .03
         },
-        "Customized Cash Rewards Visa Signature - Ending in 3445": {
+        "Customized Cash Rewards Visa Signature ( ) - Ending in 4388": {
             "Groceries": .02,
             "Online": .03
         },
+        "Travel Rewards Visa Signature ( ) - Ending in 8067": {
+            "Travel": .015
+        },
         "Citi Custom Cash Card - Ending in 9673": {
-            "Groceries": .05
+            "Restaurants": .05
         },
         "Discover It Card - Ending in 7693": {
-            "Home Maintenance": .05,
-            "Home Improvement": .05
+            "Electricity": .05,
+            "Water": .05,
+            "Gasoline/Fuel": .05
         },
         "Chase Freedom- Ending in 8642": {
-            "Restaurants": .05
+            "Amazon": .05
         },
         "Amazon Credit Card - Ending in 7980": {
             "*": .05
         },
-        "Citi Double Cash Card - Ending in 4252": {
+        "Blue Cash Everyday ( ) - Ending in 1006": {
+            "Groceries": .02,
+            "Online": .03,
+            "Gasoline/Fuel": .03,
+        },
+        "Citi Double Cash Card - Ending in 1713": {
             "*": .02
         }
 
@@ -66,7 +77,11 @@ def calculate_expense_amount(expense):
             cashback = card_categories[expense['Category']]
         else:
             cashback = .01
-        amount = float(expense['Amount']) * float(1 - cashback)
+        amount = amount * float(1 - cashback)
+    else:
+        print("The card used for this expense did not match any that I have on file, will assume that there is no "
+              "cashback. This is the amount " + expense['Amount'] + " and this is the expense's account " + expense[
+                  'Account'])
     return str(abs(round(amount, 2)))
 
 
@@ -81,7 +96,39 @@ def expense_should_count_check(expense):
 # Method to generate the JSON format for the expense
 def format_and_get_expense_info(expense):
     # define a method to extract necessary information from an expense
-    date = f"{expense['Date']}T12:00:00Z"  # I need to format the date for splitwise later
+    # Parse the date string and convert to YYYY-MM-DD format
+    date = None
+    try:
+        # Parse the input date (assuming format like MM/DD/YY with 2-digit year)
+        date_obj = datetime.strptime(expense['Date'], '%m/%d/%y')
+        date = date_obj.strftime('%Y-%m-%d')
+    except ValueError:
+        try:
+            # Try alternative format (MM/DD/YYYY with 4-digit year)
+            date_obj = datetime.strptime(expense['Date'], '%m/%d/%Y')
+            date = date_obj.strftime('%Y-%m-%d')
+        except ValueError:
+            try:
+                # Try if already in YYYY-MM-DD format
+                date_obj = datetime.strptime(expense['Date'], '%Y-%m-%d')
+                date = expense['Date']  # Already in the correct format
+            except ValueError:
+                # If parsing fails, attempt to extract date components
+                print(f"Warning: Could not parse date '{expense['Date']}', attempting to format manually")
+                # Try to handle various date formats by splitting
+                parts = expense['Date'].replace('/', '-').split('-')
+                if len(parts) == 3:
+                    try:
+                        month, day, year = int(parts[0]), int(parts[1]), int(parts[2])
+                        # Handle 2-digit year
+                        if year < 100:
+                            # Assume 20XX for years less than 50, 19XX otherwise
+                            year = 2000 + year if year < 50 else 1900 + year
+                        date = f"{year:04d}-{month:02d}-{day:02d}"
+                    except (ValueError, IndexError):
+                        date = expense['Date']  # Use original as last resort
+                else:
+                    date = expense['Date']  # Use original as last resort
     description = expense['Description']
     category = expense['Category']
     amount = expense['Amount']
@@ -110,4 +157,3 @@ def generate_expense_csv(expenses, file_path):
                 })
     except FileNotFoundError:
         print(f"File not found, file path {file_path}")
-
