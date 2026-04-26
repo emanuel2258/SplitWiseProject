@@ -49,9 +49,8 @@ def calculate_expense_amount(expense):
             "Restaurants": .05
         },
         "Discover It Card - Ending in 7693": {
-            "Electricity": .05,
-            "Water": .05,
-            "Gasoline/Fuel": .05
+            "Restaurants": .05,
+            "Home Improvements": .05
         },
         "Chase Freedom- Ending in 8642": {
             "Amazon": .05
@@ -60,7 +59,7 @@ def calculate_expense_amount(expense):
             "*": .05
         },
         "Blue Cash Everyday ( ) - Ending in 1006": {
-            "Groceries": .02,
+            "Groceries": .03,
             "Online": .03,
             "Gasoline/Fuel": .03,
         },
@@ -88,7 +87,7 @@ def calculate_expense_amount(expense):
 # Method to check if the expense should be included in splitwise
 def expense_should_count_check(expense):
     if expense['Category'] not in {'Credit Card Payments', 'Transfers', 'Refunds & Reimbursements', 'Clothing/Shoes',
-                                   'Telephone', 'Rewards'} and float(expense['Amount']) < 0:
+                                   'Telephone', 'Rewards', 'Charitable Giving'} and float(expense['Amount']) < 0:
         return True
     return False
 
