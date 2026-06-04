@@ -1,8 +1,23 @@
+"""
+DEPRECATED: This module is kept for backward compatibility with main.py.
+For new code, please use splitwise_client.py instead.
+
+This module will be removed in a future version.
+"""
+
+import warnings
+
+warnings.warn(
+    "splitwise.py is deprecated. Use splitwise_client.py instead.",
+    DeprecationWarning,
+    stacklevel=2
+)
+
 import requests
 import os
 
 
-# Mathod to generate the body I will send to splitwise
+# Method to generate the body I will send to splitwise
 # I got the body format here https://dev.splitwise.com/#tag/expenses/paths/~1create_expense/post
 def format_expense_for_splitwise_group(expense, group_id):
     body = {
@@ -29,9 +44,13 @@ def send_splitwise_expense_request(splitwise_expense):
     try:
         resp = requests.post(url, headers=request_header, data=splitwise_expense)
         resp.raise_for_status()
+        response_json = resp.json()
     except Exception as e:
-        print(f'ERROR: Failed to send the information to splitwise: {e}')
+        print(f'ERROR: Failed to send the information for {splitwise_expense["description"]} to splitwise: {e}')
         return None
-    print(
-        f"Was able to send request to create expense {splitwise_expense['description']} with amount {splitwise_expense['cost']}")
+    if 'expenses' not in response_json or len(response_json['expenses']) == 0:
+        print(f'ERROR: Failed to send the information for {splitwise_expense["description"]} '
+              f'to splitwise, this is the error from splitwise {response_json["errors"]}')
+        return None
+    print(f"Was able to send request to create expense {splitwise_expense['description']} with amount {splitwise_expense['cost']}")
     return resp

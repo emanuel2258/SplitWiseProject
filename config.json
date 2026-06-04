@@ -1,0 +1,79 @@
+{
+  "cards": {
+    "Savor - Ending in 9209": {
+      "categories": {
+        "Restaurants": 0.03,
+        "Groceries": 0.03,
+        "Entertainment": 0.03
+      },
+      "default_cashback": 0.01
+    },
+    "Customized Cash Rewards Visa Signature ( ) - Ending in 4388": {
+      "categories": {
+        "Groceries": 0.02,
+        "Online": 0.03
+      },
+      "default_cashback": 0.01
+    },
+    "Travel Rewards Visa Signature ( ) - Ending in 8067": {
+      "categories": {
+        "Travel": 0.015
+      },
+      "default_cashback": 0.01
+    },
+    "Citi Custom Cash Card - Ending in 9673": {
+      "categories": {
+        "Restaurants": 0.05
+      },
+      "default_cashback": 0.01
+    },
+    "Discover It Card - Ending in 7693": {
+      "categories": {
+        "Restaurants": 0.05,
+        "Home Improvements": 0.05
+      },
+      "default_cashback": 0.01
+    },
+    "Chase Freedom- Ending in 8642": {
+      "categories": {
+        "Amazon": 0.05
+      },
+      "default_cashback": 0.01
+    },
+    "Amazon Credit Card - Ending in 7980": {
+      "categories": {
+        "*": 0.05
+      },
+      "default_cashback": 0.05
+    },
+    "Blue Cash Everyday ( ) - Ending in 1006": {
+      "categories": {
+        "Groceries": 0.03,
+        "Online": 0.03,
+        "Gasoline/Fuel": 0.03
+      },
+      "default_cashback": 0.01
+    },
+    "Citi Double Cash Card - Ending in 1713": {
+      "categories": {
+        "*": 0.02
+      },
+      "default_cashback": 0.02
+    }
+  },
+  "excluded_categories": [
+    "Credit Card Payments",
+    "Transfers",
+    "Refunds & Reimbursements",
+    "Clothing/Shoes",
+    "Telephone",
+    "Rewards",
+    "Charitable Giving"
+  ],
+  "splitwise": {
+    "default_category_id": 18,
+    "currency_code": "USD",
+    "split_equally": true,
+    "details_suffix": "Generated using Emanuel's Script"
+  }
+}
