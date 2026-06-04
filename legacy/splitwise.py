@@ -1,3 +1,18 @@
+"""
+DEPRECATED: This module is kept for backward compatibility with main.py.
+For new code, please use splitwise_client.py instead.
+
+This module will be removed in a future version.
+"""
+
+import warnings
+
+warnings.warn(
+    "splitwise.py is deprecated. Use splitwise_client.py instead.",
+    DeprecationWarning,
+    stacklevel=2
+)
+
 import requests
 import os
 

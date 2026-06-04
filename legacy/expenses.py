@@ -1,3 +1,18 @@
+"""
+DEPRECATED: This module is kept for backward compatibility with main.py.
+For new code, please use expense_tracker.py instead.
+
+This module will be removed in a future version.
+"""
+
+import warnings
+
+warnings.warn(
+    "expenses.py is deprecated. Use expense_tracker.py instead.",
+    DeprecationWarning,
+    stacklevel=2
+)
+
 import csv
 from typing import List
 from datetime import datetime
