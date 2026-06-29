@@ -68,6 +68,17 @@ def main():
         if not validate_inputs(args):
             logger.error("Invalid inputs provided")
             sys.exit(1)
+
+        # Warn when duplicate protection is explicitly disabled
+        if not args.skip_duplicates and sys.stdin.isatty():
+            print("\n" + "!"*60)
+            print("WARNING: --skip-duplicates is disabled.")
+            print("Expenses already uploaded may be added to Splitwise again.")
+            print("!"*60)
+            response = input("Are you sure you want to continue? [y/N]: ").strip().lower()
+            if response not in ['y', 'yes']:
+                logger.info("Cancelled by user (skip-duplicates warning)")
+                sys.exit(0)
         
         # Load configuration early (needed for transaction mode)
         logger.info(f"Loading configuration from {args.config}")

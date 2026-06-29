@@ -7,6 +7,7 @@ Automatically finds the most recent transaction file and processes it.
 import os
 import sys
 import glob
+import subprocess
 from datetime import datetime
 
 try:
@@ -78,16 +79,18 @@ def main():
     
     # Ask if dry run
     dry_run = input("Run in dry-run mode (preview only)? [Y/n]: ").strip().lower()
-    dry_run_flag = "--dry-run" if not dry_run or dry_run in ['y', 'yes'] else ""
-    
-    # Build command
-    cmd = f"python3 run.py --input \"{latest_file}\" {dry_run_flag}"
-    
-    print(f"\nExecuting: {cmd}\n")
+    use_dry_run = not dry_run or dry_run in ['y', 'yes']
+
+    # Build argument list (no shell injection risk with spaces in paths)
+    cmd = [sys.executable, 'run.py', '--input', latest_file]
+    if use_dry_run:
+        cmd.append('--dry-run')
+
+    print(f"\nExecuting: {' '.join(cmd)}\n")
     print("="*60)
-    
-    # Execute the command
-    os.system(cmd)
+
+    result = subprocess.run(cmd)
+    sys.exit(result.returncode)
 
 
 if __name__ == '__main__':

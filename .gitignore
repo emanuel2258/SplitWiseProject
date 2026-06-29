@@ -55,3 +55,6 @@ Thumbs.db
 # Temporary Files
 *.tmp
 *.bak
+
+uploaded_log.json
+config.json
