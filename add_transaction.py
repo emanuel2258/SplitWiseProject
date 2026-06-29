@@ -8,6 +8,7 @@ from typing import Dict, Any, Optional
 from datetime import datetime
 from src.utils.logger import get_logger
 from src.utils.config_loader import get_card_cashback
+from src.utils.date_utils import parse_expense_date
 
 
 logger = get_logger()
@@ -33,7 +34,7 @@ def prompt_transaction_details() -> Dict[str, Any]:
             transaction['date'] = datetime.now().strftime('%Y-%m-%d')
             break
         try:
-            transaction['date'] = parse_transaction_date(date_input)
+            transaction['date'] = parse_expense_date(date_input)
             break
         except ValueError as e:
             print(f"Invalid date format: {e}. Please try again.")
@@ -76,53 +77,6 @@ def prompt_transaction_details() -> Dict[str, Any]:
     return transaction
 
 
-def parse_transaction_date(date_str: str) -> str:
-    """
-    Parse date string into YYYY-MM-DD format.
-    
-    Args:
-        date_str: Date string in various formats
-    
-    Returns:
-        Date in YYYY-MM-DD format
-    
-    Raises:
-        ValueError: If date cannot be parsed
-    """
-    date_formats = [
-        '%Y-%m-%d',      # 2026-03-15
-        '%m/%d/%y',      # 03/15/26
-        '%m/%d/%Y',      # 03/15/2026
-        '%Y/%m/%d',      # 2026/03/15
-    ]
-    
-    for fmt in date_formats:
-        try:
-            date_obj = datetime.strptime(date_str, fmt)
-            return date_obj.strftime('%Y-%m-%d')
-        except ValueError:
-            continue
-    
-    # Manual parsing as fallback
-    try:
-        parts = date_str.replace('/', '-').split('-')
-        if len(parts) == 3:
-            # Try YYYY-MM-DD format
-            if len(parts[0]) == 4:
-                year, month, day = int(parts[0]), int(parts[1]), int(parts[2])
-            else:
-                # Try MM-DD-YY format
-                month, day, year = int(parts[0]), int(parts[1]), int(parts[2])
-                if year < 100:
-                    year = 2000 + year if year < 50 else 1900 + year
-            
-            return f"{year:04d}-{month:02d}-{day:02d}"
-    except (ValueError, IndexError):
-        pass
-    
-    raise ValueError(f"Could not parse date '{date_str}'")
-
-
 def calculate_transaction_amount(
     transaction: Dict[str, Any],
     config: Dict[str, Any]
@@ -148,7 +102,8 @@ def calculate_transaction_amount(
     cashback_rate = get_card_cashback(
         config,
         transaction['account'],
-        transaction['category']
+        transaction['category'],
+        transaction.get('date')
     )
     
     cashback_amount = original_amount * cashback_rate

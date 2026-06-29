@@ -1,6 +1,17 @@
 {
+  "card_aliases": {
+    "Savor - Ending in 9209": "savor",
+    "Customized Cash Rewards Visa Signature ( ) - Ending in 4388": "bofa_customized_cash",
+    "Travel Rewards Visa Signature ( ) - Ending in 8067": "bofa_travel",
+    "Citi Custom Cash Card - Ending in 9673": "citi_custom_cash",
+    "Discover It Card - Ending in 7693": "discover_it",
+    "Chase Freedom- Ending in 8642": "chase_freedom",
+    "Amazon Credit Card - Ending in 7980": "amazon_card",
+    "Blue Cash Everyday ( ) - Ending in 1006": "bofa_blue_cash",
+    "Citi Double Cash Card - Ending in 1713": "citi_double_cash"
+  },
   "cards": {
-    "Savor - Ending in 9209": {
+    "savor": {
       "categories": {
         "Restaurants": 0.03,
         "Groceries": 0.03,
@@ -8,45 +19,49 @@
       },
       "default_cashback": 0.01
     },
-    "Customized Cash Rewards Visa Signature ( ) - Ending in 4388": {
+    "bofa_customized_cash": {
       "categories": {
         "Groceries": 0.02,
         "Online": 0.03
       },
       "default_cashback": 0.01
     },
-    "Travel Rewards Visa Signature ( ) - Ending in 8067": {
+    "bofa_travel": {
       "categories": {
         "Travel": 0.015
       },
       "default_cashback": 0.01
     },
-    "Citi Custom Cash Card - Ending in 9673": {
+    "citi_custom_cash": {
       "categories": {
-        "Restaurants": 0.05
+        "Restaurants": [
+          {"rate": 0.05, "valid_from": "2026-01-01", "valid_until": "2026-12-31"}
+        ]
       },
       "default_cashback": 0.01
     },
-    "Discover It Card - Ending in 7693": {
+    "discover_it": {
       "categories": {
-        "Restaurants": 0.05,
+        "Restaurants": [
+          {"rate": 0.05, "valid_from": "2026-07-01", "valid_until": "2026-09-30"}
+        ],
         "Home Improvements": 0.05
       },
       "default_cashback": 0.01
     },
-    "Chase Freedom- Ending in 8642": {
+    "chase_freedom": {
       "categories": {
         "Amazon": 0.05
       },
       "default_cashback": 0.01
     },
-    "Amazon Credit Card - Ending in 7980": {
+    "amazon_card": {
       "categories": {
         "*": 0.05
       },
       "default_cashback": 0.05
     },
-    "Blue Cash Everyday ( ) - Ending in 1006": {
+    "bofa_blue_cash": {
       "categories": {
         "Groceries": 0.03,
         "Online": 0.03,
@@ -54,7 +69,7 @@
       },
       "default_cashback": 0.01
     },
-    "Citi Double Cash Card - Ending in 1713": {
+    "citi_double_cash": {
       "categories": {
         "*": 0.02
       },

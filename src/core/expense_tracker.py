@@ -2,9 +2,9 @@ import csv
 import json
 import os
 from typing import List, Dict, Any, Tuple
-from datetime import datetime
 from src.utils.logger import get_logger
 from src.utils.config_loader import get_card_cashback, get_excluded_categories
+from src.utils.date_utils import parse_expense_date
 
 
 """
@@ -142,7 +142,12 @@ def process_expense_row(
     """
     try:
         original_amount = abs(float(row['Amount']))
-        cashback_rate = get_card_cashback(config, row['Account'], row['Category'])
+        raw_date = row.get('Date')
+        try:
+            parsed_date = parse_expense_date(raw_date) if raw_date else None
+        except ValueError:
+            parsed_date = None
+        cashback_rate = get_card_cashback(config, row['Account'], row['Category'], parsed_date)
         cashback_amount = original_amount * cashback_rate
         final_amount = original_amount - cashback_amount
         
@@ -183,71 +188,36 @@ def expense_should_count_check(expense: Dict[str, str], excluded_categories: set
 def format_and_get_expense_info(expense: Dict[str, str]) -> Dict[str, Any]:
     """
     Format expense data into standardized structure.
-    
+
     Args:
         expense: Raw expense data
-    
+
     Returns:
         Formatted expense dictionary
-    
+
     Raises:
         ValueError: If required fields are missing or invalid
     """
-    date = parse_expense_date(expense.get('Date', ''))
+    raw_date = expense.get('Date', '')
+    try:
+        date = parse_expense_date(raw_date)
+    except ValueError:
+        logger.warning(f"Could not parse date '{raw_date}', using original value")
+        date = raw_date
+
     description = expense.get('Description', '').strip()
     category = expense.get('Category', '').strip()
     amount = expense.get('Amount', '').strip()
-    
+
     if not all([date, description, category, amount]):
         raise ValueError("Missing required expense information")
-    
+
     return {
         'date': date,
         'description': description,
         'category': category,
         'amount': amount
     }
-
-
-def parse_expense_date(date_str: str) -> str:
-    """
-    Parse date string into YYYY-MM-DD format.
-    
-    Args:
-        date_str: Date string in various formats
-    
-    Returns:
-        Date in YYYY-MM-DD format
-    """
-    date_formats = [
-        '%m/%d/%y',      # 03/15/26
-        '%m/%d/%Y',      # 03/15/2026
-        '%Y-%m-%d',      # 2026-03-15
-    ]
-    
-    for fmt in date_formats:
-        try:
-            date_obj = datetime.strptime(date_str, fmt)
-            return date_obj.strftime('%Y-%m-%d')
-        except ValueError:
-            continue
-    
-    # Manual parsing as fallback
-    try:
-        parts = date_str.replace('/', '-').split('-')
-        if len(parts) == 3:
-            month, day, year = int(parts[0]), int(parts[1]), int(parts[2])
-            
-            # Handle 2-digit year
-            if year < 100:
-                year = 2000 + year if year < 50 else 1900 + year
-            
-            return f"{year:04d}-{month:02d}-{day:02d}"
-    except (ValueError, IndexError):
-        pass
-    
-    logger.warning(f"Could not parse date '{date_str}', using original")
-    return date_str
 
 
 def generate_expense_csv(expenses: List[Dict[str, Any]], file_path: str) -> bool:
