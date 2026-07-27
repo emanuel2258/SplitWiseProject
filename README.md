@@ -350,24 +350,41 @@ a year are deleted, and upload-log entries whose expense date is older than a ye
 
 ```
 SplitWiseProject/
-├── config.json              # Card and cashback configuration
-├── .env.example            # Environment variable template
-├── README.md               # This file
-├── run.py                  # Main entry point
-├── cli.py                  # Command-line interface
-├── logger.py               # Logging configuration
-├── config_loader.py        # Configuration management
-├── expense_tracker.py      # Expense processing logic
-├── splitwise_client.py     # Splitwise API client
-├── add_transaction.py      # Single transaction handling
-├── main.py                 # Legacy entry point (deprecated)
-├── expenses.py             # Legacy module (deprecated)
-└── splitwise.py            # Legacy module (deprecated)
+├── config.json                  # Card and cashback configuration
+├── .env.example                 # Environment variable template
+├── requirements.txt             # Runtime dependencies
+├── requirements-dev.txt         # + pytest, for running the test suite
+├── README.md                    # This file
+├── run.py                       # Main entry point
+├── add_transaction.py           # Single transaction handling
+├── process_monthly.py           # Auto-find and process the latest transaction file
+│
+├── src/
+│   ├── core/
+│   │   ├── expense_tracker.py   # Expense processing logic
+│   │   └── splitwise_client.py  # Splitwise API client, upload log
+│   └── utils/
+│       ├── cli.py               # Command-line interface
+│       ├── config_loader.py     # Configuration management
+│       ├── date_utils.py        # Shared date parsing
+│       ├── logger.py            # Logging configuration
+│       └── retention.py         # Prunes old logs/summaries/upload-log entries
+│
+├── tests/                       # pytest test suite
+│
+├── docs/
+│   ├── MIGRATION_GUIDE.md       # History of the main.py → run.py migration
+│   └── QUICK_START_TRANSACTION.md
+│
+└── .github/workflows/tests.yml  # CI: runs pytest on push/PR
 ```
 
 ## Migration from Old Version
 
-If you were using the old `main.py`:
+The project originally shipped as a single `main.py` script with hardcoded configuration; that
+script (along with `expenses.py` and `splitwise.py`) has since been removed in favor of `run.py`
+and the `src/` package. See [docs/MIGRATION_GUIDE.md](docs/MIGRATION_GUIDE.md) for the full history
+and a step-by-step migration guide if you're still on the old version.
 
 **Old way:**
 ```bash
@@ -384,7 +401,7 @@ python run.py --input /path/to/expenses/expenses.csv --group-id 12345
 The new version offers:
 - Better error handling
 - Dry run mode
-- Duplicate detection
+- Occurrence-aware duplicate detection
 - Summary reports
 - Interactive mode
 - Easier configuration

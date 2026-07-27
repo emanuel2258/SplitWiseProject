@@ -54,8 +54,8 @@ Root Directory (You are here!)
 │   ├── core/              
 │   └── utils/             
 │
+├── tests/                  🧪 pytest test suite
 ├── docs/                   📖 Documentation
-├── legacy/                 🗄️  Old files (ignore)
 └── logs/                   📝 Auto-generated logs
 ```
 

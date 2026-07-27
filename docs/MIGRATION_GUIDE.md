@@ -231,12 +231,9 @@ python run.py --input FILE --group-id ID --api-key KEY
 
 ## Backward Compatibility
 
-The old files are still present for backward compatibility:
-- `main.py` - Shows deprecation warning
-- `expenses.py` - Shows deprecation warning
-- `splitwise.py` - Shows deprecation warning
-
-These will be removed in a future version. Please migrate to the new version.
+The old `main.py`, `expenses.py`, and `splitwise.py` files have been removed from the repository.
+They're still available in git history if you need to reference them, but all functionality now
+lives in `run.py` and the `src/` package — please migrate to the new version.
 
 ## Getting Help
 
