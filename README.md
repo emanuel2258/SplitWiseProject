@@ -25,7 +25,7 @@ cd SplitWiseProject
 
 2. Install required dependencies:
 ```bash
-pip install requests
+pip install -r requirements.txt
 ```
 
 3. Set up your environment variables:
@@ -44,7 +44,6 @@ Create a `.env` file based on `.env.example`:
 
 ```bash
 CSV_READ_PATH=/path/to/your/expenses/
-CSV_READ_FILE_NAME=expenses.csv
 CSV_WRITE_PATH=/path/to/output/
 SPLITWISE_API_KEY=your_api_key_here
 SPLITWISE_GROUP_ID=your_group_id_here
@@ -174,7 +173,7 @@ python run.py --add-transaction --dry-run
 --dry-run, -d        Preview without uploading
 --summary-only, -s   Generate report only, don't upload
 --interactive, -I    Run in interactive mode
---skip-duplicates    Skip duplicate expenses (default: true)
+--no-skip-duplicates Allow re-uploading duplicate expenses (default: duplicates are skipped)
 --verbose, -v        Enable verbose logging
 
 Transaction Mode Options:
@@ -310,7 +309,10 @@ python run.py --input /full/path/to/expenses.csv
 
 ### Duplicate expenses
 
-**Solution:** The application automatically detects duplicates within a session. If you need to re-upload, the duplicate detection will prevent double-posting.
+**Solution:** The application detects duplicates by date, description, and amount, persisted across
+runs in `uploaded_log.json`. Detection is occurrence-aware: if you have two genuinely separate
+expenses on the same day with the same description and amount (e.g., two identical coffee
+purchases), both will upload — only re-uploading an already-uploaded combination gets skipped.
 
 ## Advanced Features
 
@@ -337,6 +339,12 @@ Generate detailed JSON reports:
 from expense_tracker import save_summary_json
 # Summary is automatically saved during processing
 ```
+
+### Data Retention
+
+To keep `logs/`, `summaries/`, and `uploaded_log.json` from growing forever, the app automatically
+prunes entries older than 365 days each time it runs: log files and summary JSON files older than
+a year are deleted, and upload-log entries whose expense date is older than a year are dropped.
 
 ## Project Structure
 
@@ -380,6 +388,15 @@ The new version offers:
 - Summary reports
 - Interactive mode
 - Easier configuration
+
+## Testing
+
+Install dev dependencies and run the test suite with `pytest`:
+
+```bash
+pip install -r requirements-dev.txt
+pytest
+```
 
 ## Contributing
 

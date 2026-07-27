@@ -2,13 +2,16 @@ import json
 import os
 import time
 import requests
+from collections import Counter
+from datetime import datetime, timedelta
 from typing import Dict, Any, Optional
 from src.utils.logger import get_logger
 from src.utils.config_loader import get_splitwise_config
+from src.utils.retention import RETENTION_DAYS
 
 
 """
-Enhanced Splitwise API client with persistent duplicate detection,
+Enhanced Splitwise API client with persistent count-based duplicate detection,
 retry logic with exponential backoff, and dry run mode support.
 """
 
@@ -46,7 +49,7 @@ class SplitwiseClient:
         self.splitwise_config = get_splitwise_config(config)
         self.base_url = 'https://secure.splitwise.com/api/v3.0'
 
-        self.uploaded_expenses: set = self._load_upload_log()
+        self.uploaded_expenses: Counter = self._load_upload_log()
 
         if dry_run:
             logger.info("Splitwise client initialized in DRY RUN mode - no expenses will be uploaded")
@@ -60,23 +63,55 @@ class SplitwiseClient:
     # Persistent upload log
     # ------------------------------------------------------------------
 
-    def _load_upload_log(self) -> set:
-        """Load previously uploaded expense keys from disk."""
+    @staticmethod
+    def _key_is_expired(key: str, cutoff_date) -> bool:
+        """A key is expired if its embedded date is older than cutoff_date.
+        Keys with an unparseable date prefix are kept (fail safe)."""
+        date_part = key.split('|', 1)[0]
+        try:
+            return datetime.strptime(date_part, '%Y-%m-%d').date() < cutoff_date
+        except ValueError:
+            return False
+
+    def _load_upload_log(self) -> Counter:
+        """Load previously uploaded expense keys from disk as occurrence counts,
+        dropping entries older than RETENTION_DAYS so the log doesn't grow unbounded.
+
+        The log is stored as a flat list of keys where a key appears once per
+        actual upload, so occurrence counts survive a plain JSON round-trip."""
         if not os.path.exists(self.log_path):
-            return set()
+            return Counter()
         try:
             with open(self.log_path, 'r') as f:
                 data = json.load(f)
-            return set(data.get('uploaded', []))
+            counts = Counter(data.get('uploaded', []))
         except (json.JSONDecodeError, KeyError, OSError) as e:
             logger.warning(f"Could not read upload log '{self.log_path}': {e}. Starting fresh.")
-            return set()
+            return Counter()
+
+        cutoff_date = (datetime.now() - timedelta(days=RETENTION_DAYS)).date()
+        pruned = Counter({
+            key: count for key, count in counts.items()
+            if not self._key_is_expired(key, cutoff_date)
+        })
+
+        removed = sum(counts.values()) - sum(pruned.values())
+        if removed:
+            logger.info(f"Pruned {removed} upload log entries older than {RETENTION_DAYS} days")
+            try:
+                with open(self.log_path, 'w') as f:
+                    json.dump({'uploaded': sorted(pruned.elements())}, f, indent=2)
+            except OSError as e:
+                logger.warning(f"Could not persist pruned upload log '{self.log_path}': {e}")
+
+        return pruned
 
     def _save_upload_log(self):
-        """Persist the current set of uploaded expense keys to disk."""
+        """Persist the current occurrence counts to disk as a flat list of keys
+        (one entry per upload), so counts survive a plain JSON round-trip."""
         try:
             with open(self.log_path, 'w') as f:
-                json.dump({'uploaded': sorted(self.uploaded_expenses)}, f, indent=2)
+                json.dump({'uploaded': sorted(self.uploaded_expenses.elements())}, f, indent=2)
         except OSError as e:
             logger.error(f"Could not save upload log '{self.log_path}': {e}")
 
@@ -89,16 +124,17 @@ class SplitwiseClient:
         return f"{expense['date']}|{expense['description']}|{expense['amount']}"
 
     def is_duplicate(self, expense: Dict[str, Any]) -> bool:
-        """Return True if this expense exists in the persistent upload log."""
+        """Return True if this expense has been uploaded at least once before,
+        according to the persistent log."""
         key = self._expense_key(expense)
-        if key in self.uploaded_expenses:
+        if self.uploaded_expenses[key] > 0:
             logger.warning(f"Duplicate expense detected: {expense['description']} (${expense['amount']})")
             return True
         return False
 
     def mark_as_uploaded(self, expense: Dict[str, Any]):
-        """Record expense as uploaded and save the log to disk."""
-        self.uploaded_expenses.add(self._expense_key(expense))
+        """Record one more occurrence of this expense as uploaded and save the log to disk."""
+        self.uploaded_expenses[self._expense_key(expense)] += 1
         self._save_upload_log()
 
     # ------------------------------------------------------------------
@@ -225,6 +261,12 @@ class SplitwiseClient:
         """
         Upload multiple expenses to Splitwise.
 
+        Duplicate detection is occurrence-aware: if a given date/description/amount
+        combination was uploaded N times before, only the first N occurrences of that
+        same combination in this batch are treated as duplicates. Any further identical
+        occurrences are genuinely new expenses (e.g. two separate same-day coffees) and
+        get uploaded normally.
+
         Args:
             expenses:        List of expense dictionaries
             group_id:        Splitwise group ID
@@ -235,8 +277,18 @@ class SplitwiseClient:
         """
         stats = {'total': len(expenses), 'uploaded': 0, 'skipped': 0, 'failed': 0}
 
+        # Snapshot persisted counts so uploads made earlier in this same batch
+        # don't shift the duplicate threshold for later occurrences of the same key.
+        previously_uploaded = Counter(self.uploaded_expenses)
+        seen_in_batch = Counter()
+
         for expense in expenses:
-            if skip_duplicates and self.is_duplicate(expense):
+            key = self._expense_key(expense)
+            occurrence_index = seen_in_batch[key]
+            seen_in_batch[key] += 1
+
+            if skip_duplicates and occurrence_index < previously_uploaded[key]:
+                logger.warning(f"Duplicate expense detected: {expense['description']} (${expense['amount']})")
                 stats['skipped'] += 1
                 continue
 
@@ -245,7 +297,8 @@ class SplitwiseClient:
 
             if response:
                 stats['uploaded'] += 1
-                self.mark_as_uploaded(expense)
+                if not self.dry_run:
+                    self.mark_as_uploaded(expense)
             else:
                 stats['failed'] += 1
 

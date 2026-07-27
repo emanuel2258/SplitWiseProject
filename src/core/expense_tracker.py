@@ -5,6 +5,7 @@ from typing import List, Dict, Any, Tuple
 from src.utils.logger import get_logger
 from src.utils.config_loader import get_card_cashback, get_excluded_categories
 from src.utils.date_utils import parse_expense_date
+from src.utils.retention import prune_old_files
 
 
 """
@@ -301,8 +302,10 @@ def save_summary_json(stats: ExpenseStats, file_path: str):
     """
     try:
         # Ensure the directory exists
-        os.makedirs(os.path.dirname(file_path), exist_ok=True)
-        
+        summaries_dir = os.path.dirname(file_path)
+        os.makedirs(summaries_dir, exist_ok=True)
+        prune_old_files(summaries_dir, 'summary_*.json')
+
         summary = stats.get_summary()
         with open(file_path, 'w') as f:
             json.dump(summary, f, indent=2)
