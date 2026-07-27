@@ -19,8 +19,8 @@ Automated expense tracking system that:
 - **Logs:** `logs/`
 
 ### Configuration Files
-- **`.env`** - Environment variables (API keys, paths)
-- **`config.json`** - Card cashback rates and excluded categories
+- **`.env`** - Environment variables (API keys, paths); gitignored, copy from `.env.example`
+- **`config.json`** - Card cashback rates and excluded categories; gitignored, copy from `config.example.json`
 - **`requirements.txt`** - Python dependencies
 
 ## Common Operations

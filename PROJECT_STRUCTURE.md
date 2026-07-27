@@ -6,8 +6,9 @@ SplitWiseProject/
 ├── run.py                      # ⭐ MAIN ENTRY POINT - Start here!
 ├── process_monthly.py          # 🔄 Helper to auto-find latest transactions
 ├── add_transaction.py          # ➕ Add single transaction manually
-├── config.json                 # ⚙️  Card cashback configuration
-├── .env                        # 🔐 Environment variables (API keys, paths)
+├── config.json                 # ⚙️  Card cashback configuration (gitignored, local only)
+├── config.example.json         # ⚙️  Template for config.json (committed)
+├── .env                        # 🔐 Environment variables (API keys, paths, gitignored)
 ├── requirements.txt            # 📦 Python dependencies
 ├── requirements-dev.txt        # 🧪 + pytest, for running the test suite
 ├── README.md                   # 📖 Complete documentation
@@ -43,8 +44,12 @@ SplitWiseProject/
 # Install dependencies
 pip3 install -r requirements.txt
 
-# Configure your cards in config.json
+# Set up config.json (gitignored - contains your real card names/numbers)
+cp config.example.json config.json
+# Edit config.json with your cards and cashback rates
+
 # Set up .env file with your API keys
+cp .env.example .env
 ```
 
 ### 2️⃣ Process Monthly Expenses
@@ -90,7 +95,8 @@ python3 run.py --add-transaction
 
 | File | Purpose | How to Edit |
 |------|---------|-------------|
-| **config.json** | Card cashback rates, excluded categories | Edit directly when rates change |
+| **config.json** | Card cashback rates, excluded categories (gitignored — copy from `config.example.json`) | Edit directly when rates change |
+| **config.example.json** | Template for config.json | Committed to the repo; copy, don't edit in place |
 | **.env** | API keys, file paths | Edit for credentials/paths |
 | **requirements.txt** | Python dependencies | Run `pip3 install -r requirements.txt` |
 

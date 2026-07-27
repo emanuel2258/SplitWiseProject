@@ -34,7 +34,13 @@ cp .env.example .env
 # Edit .env with your actual values
 ```
 
-4. Configure your cards and cashback rates in `config.json`
+4. Set up your card configuration:
+```bash
+cp config.example.json config.json
+# Edit config.json with your actual cards and cashback rates
+```
+`config.json` is gitignored since it contains your real card names/numbers — only
+`config.example.json` is tracked in the repo.
 
 ## Configuration
 

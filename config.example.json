@@ -1,0 +1,36 @@
+{
+  "card_aliases": {
+    "Example Rewards Card - Ending in 0000": "example_card_1",
+    "Example Travel Card - Ending in 0000": "example_card_2"
+  },
+  "cards": {
+    "example_card_1": {
+      "categories": {
+        "Restaurants": 0.03,
+        "Groceries": 0.03,
+        "Entertainment": 0.03
+      },
+      "default_cashback": 0.01
+    },
+    "example_card_2": {
+      "categories": {
+        "Travel": 0.015,
+        "Restaurants": [
+          {"rate": 0.05, "valid_from": "2026-01-01", "valid_until": "2026-03-31"}
+        ]
+      },
+      "default_cashback": 0.01
+    }
+  },
+  "excluded_categories": [
+    "Credit Card Payments",
+    "Transfers",
+    "Refunds & Reimbursements"
+  ],
+  "splitwise": {
+    "default_category_id": 18,
+    "currency_code": "USD",
+    "split_equally": true,
+    "details_suffix": "Generated using expense tracker script"
+  }
+}
