@@ -7,6 +7,7 @@ Automatically finds the most recent transaction file and processes it.
 import os
 import sys
 import glob
+import argparse
 import subprocess
 from datetime import datetime
 
@@ -47,8 +48,26 @@ def find_latest_transaction_file(transactions_path):
     return transaction_files[0]
 
 
+def parse_args():
+    """Parse optional pass-through arguments for run.py."""
+    parser = argparse.ArgumentParser(
+        description='Process the most recent monthly transaction file with run.py'
+    )
+    parser.add_argument('--group-id', '-g', type=str, help='Splitwise group ID (passed to run.py)')
+    parser.add_argument('--api-key', '-k', type=str, help='Splitwise API key (passed to run.py)')
+    parser.add_argument('--config', '-c', type=str, help='Path to config file (passed to run.py)')
+    parser.add_argument(
+        '--no-skip-duplicates',
+        action='store_true',
+        help='Allow re-uploading duplicate expenses (passed to run.py)'
+    )
+    return parser.parse_args()
+
+
 def main():
     """Main entry point."""
+    args = parse_args()
+
     # Load environment variables from .env file
     load_dotenv()
     
@@ -85,6 +104,14 @@ def main():
     cmd = [sys.executable, 'run.py', '--input', latest_file]
     if use_dry_run:
         cmd.append('--dry-run')
+    if args.group_id:
+        cmd.extend(['--group-id', args.group_id])
+    if args.api_key:
+        cmd.extend(['--api-key', args.api_key])
+    if args.config:
+        cmd.extend(['--config', args.config])
+    if args.no_skip_duplicates:
+        cmd.append('--no-skip-duplicates')
 
     print(f"\nExecuting: {' '.join(cmd)}\n")
     print("="*60)

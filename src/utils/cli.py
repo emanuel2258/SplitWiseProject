@@ -100,10 +100,11 @@ Examples:
     )
     
     parser.add_argument(
-        '--skip-duplicates',
-        action='store_true',
+        '--no-skip-duplicates',
+        dest='skip_duplicates',
+        action='store_false',
         default=True,
-        help='Skip duplicate expenses (default: True)'
+        help='Do not skip duplicate expenses, allow re-uploading them (default: skip duplicates)'
     )
     
     parser.add_argument(

@@ -6,31 +6,34 @@ SplitWiseProject/
 ├── run.py                      # ⭐ MAIN ENTRY POINT - Start here!
 ├── process_monthly.py          # 🔄 Helper to auto-find latest transactions
 ├── add_transaction.py          # ➕ Add single transaction manually
-├── config.json                 # ⚙️  Card cashback configuration
-├── .env                        # 🔐 Environment variables (API keys, paths)
+├── config.json                 # ⚙️  Card cashback configuration (gitignored, local only)
+├── config.example.json         # ⚙️  Template for config.json (committed)
+├── .env                        # 🔐 Environment variables (API keys, paths, gitignored)
 ├── requirements.txt            # 📦 Python dependencies
+├── requirements-dev.txt        # 🧪 + pytest, for running the test suite
 ├── README.md                   # 📖 Complete documentation
 │
 ├── src/                        # Source code modules
 │   ├── core/                   # Core business logic
 │   │   ├── expense_tracker.py  # Expense processing & statistics
-│   │   └── splitwise_client.py # Splitwise API integration
+│   │   └── splitwise_client.py # Splitwise API integration, upload log
 │   │
 │   └── utils/                  # Utility modules
 │       ├── logger.py           # Logging configuration
 │       ├── config_loader.py    # Configuration management
+│       ├── date_utils.py       # Shared date parsing
+│       ├── retention.py        # Prunes old logs/summaries/upload-log entries
 │       └── cli.py              # Command-line interface
 │
+├── tests/                      # pytest test suite
+│
 ├── docs/                       # Documentation
-│   ├── MIGRATION_GUIDE.md      # Upgrade from old version
+│   ├── MIGRATION_GUIDE.md      # History of the main.py → run.py migration
 │   └── QUICK_START_TRANSACTION.md  # Quick start for single transactions
 │
-├── legacy/                     # Deprecated files (kept for reference)
-│   ├── main.py                 # Old entry point
-│   ├── expenses.py             # Old expense module
-│   └── splitwise.py            # Old Splitwise module
+├── .github/workflows/          # CI: runs pytest on push/PR
 │
-└── logs/                       # Log files (auto-generated)
+└── logs/                       # Log files (auto-generated, pruned after 1 year)
     └── expense_tracker_*.log
 ```
 
@@ -41,8 +44,12 @@ SplitWiseProject/
 # Install dependencies
 pip3 install -r requirements.txt
 
-# Configure your cards in config.json
+# Set up config.json (gitignored - contains your real card names/numbers)
+cp config.example.json config.json
+# Edit config.json with your cards and cashback rates
+
 # Set up .env file with your API keys
+cp .env.example .env
 ```
 
 ### 2️⃣ Process Monthly Expenses
@@ -88,7 +95,8 @@ python3 run.py --add-transaction
 
 | File | Purpose | How to Edit |
 |------|---------|-------------|
-| **config.json** | Card cashback rates, excluded categories | Edit directly when rates change |
+| **config.json** | Card cashback rates, excluded categories (gitignored — copy from `config.example.json`) | Edit directly when rates change |
+| **config.example.json** | Template for config.json | Committed to the repo; copy, don't edit in place |
 | **.env** | API keys, file paths | Edit for credentials/paths |
 | **requirements.txt** | Python dependencies | Run `pip3 install -r requirements.txt` |
 
@@ -97,24 +105,23 @@ python3 run.py --add-transaction
 | Module | Purpose |
 |--------|---------|
 | **src/core/expense_tracker.py** | Process expenses, calculate cashback, generate reports |
-| **src/core/splitwise_client.py** | Communicate with Splitwise API, handle uploads |
+| **src/core/splitwise_client.py** | Communicate with Splitwise API, handle uploads, upload log |
 | **src/utils/logger.py** | Configure logging system |
 | **src/utils/config_loader.py** | Load and validate configuration |
+| **src/utils/date_utils.py** | Shared date parsing (MM/DD/YY, YYYY-MM-DD, etc.) |
+| **src/utils/retention.py** | Prune log/summary files older than 1 year |
 | **src/utils/cli.py** | Command-line interface and prompts |
+
+### Tests (tests/)
+
+Run with `pytest` (after `pip3 install -r requirements-dev.txt`). See [README.md](README.md#testing).
 
 ### Documentation (docs/)
 
 | File | Purpose |
 |------|---------|
-| **docs/MIGRATION_GUIDE.md** | How to upgrade from old version |
+| **docs/MIGRATION_GUIDE.md** | History of the old `main.py` → `run.py` migration |
 | **docs/QUICK_START_TRANSACTION.md** | Quick guide for single transactions |
-
-### Legacy Files (legacy/)
-
-⚠️ **Do not use these files** - kept only for reference
-- `legacy/main.py` - Old entry point (use `run.py` instead)
-- `legacy/expenses.py` - Old expense module
-- `legacy/splitwise.py` - Old Splitwise module
 
 ## Execution Flow
 

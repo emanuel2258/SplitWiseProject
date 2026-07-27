@@ -2,6 +2,7 @@ import logging
 import sys
 import os
 from datetime import datetime
+from src.utils.retention import prune_old_files
 
 
 """
@@ -47,7 +48,8 @@ def setup_logger(name='expense_tracker', log_file=None, level=logging.INFO):
         # Create logs directory if it doesn't exist
         log_dir = 'logs'
         os.makedirs(log_dir, exist_ok=True)
-        
+        prune_old_files(log_dir, '*.log')
+
         timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
         log_file = os.path.join(log_dir, f'expense_tracker_{timestamp}.log')
     

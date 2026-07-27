@@ -203,9 +203,17 @@ def add_single_transaction(
     """
     if not all([description, category, amount]):
         raise ValueError("Description, category, and amount are required")
-    
+
+    if date:
+        try:
+            parsed_date = parse_expense_date(date)
+        except ValueError as e:
+            raise ValueError(f"Invalid transaction date: {e}")
+    else:
+        parsed_date = datetime.now().strftime('%Y-%m-%d')
+
     transaction = {
-        'date': date or datetime.now().strftime('%Y-%m-%d'),
+        'date': parsed_date,
         'description': description,
         'category': category,
         'amount': float(amount)

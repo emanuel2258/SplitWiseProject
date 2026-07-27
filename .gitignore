@@ -28,6 +28,9 @@ env/
 # Environment Variables
 .env
 
+# Local Configuration (contains your real card names/numbers - see config.example.json)
+config.json
+
 # IDE
 .vscode/
 .idea/

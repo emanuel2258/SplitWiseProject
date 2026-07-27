@@ -19,8 +19,8 @@ Automated expense tracking system that:
 - **Logs:** `logs/`
 
 ### Configuration Files
-- **`.env`** - Environment variables (API keys, paths)
-- **`config.json`** - Card cashback rates and excluded categories
+- **`.env`** - Environment variables (API keys, paths); gitignored, copy from `.env.example`
+- **`config.json`** - Card cashback rates and excluded categories; gitignored, copy from `config.example.json`
 - **`requirements.txt`** - Python dependencies
 
 ## Common Operations
@@ -43,6 +43,7 @@ python3 run.py --input "../../empower_data/Transactions/YYYY-MM-DD thru YYYY-MM-
 ```bash
 python3 process_monthly.py
 ```
+Optional pass-through flags: `--group-id`, `--api-key`, `--config`, `--no-skip-duplicates`.
 
 **When to use:** Automatically find and process the most recent transaction file
 
@@ -207,7 +208,7 @@ Options:
   --dry-run, -d        Preview without uploading
   --summary-only, -s   Generate report only
   --interactive, -I    Interactive mode
-  --skip-duplicates    Skip duplicate expenses (default: true)
+  --no-skip-duplicates Allow re-uploading duplicate expenses (default: duplicates are skipped)
   --verbose, -v        Enable verbose logging
 ```
 
