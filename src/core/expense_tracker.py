@@ -31,7 +31,15 @@ class ExpenseStats:
         self.errors = []
     
     def add_processed(self, amount: float, cashback: float, category: str):
-        """Record a successfully processed expense."""
+        """Record a successfully processed expense.
+
+        Args:
+            amount:   The ORIGINAL amount charged to the card, before cashback.
+                      Passing the post-cashback amount here makes net_amount
+                      subtract the cashback twice.
+            cashback: Cashback earned on this expense.
+            category: Expense category, for the breakdown.
+        """
         self.processed_expenses += 1
         self.total_amount += amount
         self.total_cashback += cashback
@@ -58,6 +66,8 @@ class ExpenseStats:
             'processed': self.processed_expenses,
             'skipped': self.skipped_expenses,
             'failed': self.failed_expenses,
+            # total_amount is gross (as charged); net_amount is what actually
+            # gets uploaded, i.e. gross minus cashback.
             'total_amount': round(self.total_amount, 2),
             'total_cashback': round(self.total_cashback, 2),
             'net_amount': round(self.total_amount - self.total_cashback, 2),
@@ -156,7 +166,7 @@ def process_expense_row(
         expense_info = format_and_get_expense_info(row)
         expenses.append(expense_info)
         
-        stats.add_processed(final_amount, cashback_amount, row['Category'])
+        stats.add_processed(original_amount, cashback_amount, row['Category'])
         
     except (ValueError, KeyError) as e:
         error_msg = f"Invalid expense data in row: {str(e)}"
@@ -274,12 +284,12 @@ def print_summary_report(stats: ExpenseStats):
     print(f"Processed: {summary['processed']}")
     print(f"Skipped: {summary['skipped']}")
     print(f"Failed: {summary['failed']}")
-    print(f"\nTotal amount: ${summary['total_amount']:.2f}")
+    print(f"\nTotal amount (as charged): ${summary['total_amount']:.2f}")
     print(f"Total cashback: ${summary['total_cashback']:.2f}")
-    print(f"Net amount: ${summary['net_amount']:.2f}")
+    print(f"Net amount (uploaded to Splitwise): ${summary['net_amount']:.2f}")
     
     if summary['category_breakdown']:
-        print(f"\nCategory Breakdown:")
+        print(f"\nCategory Breakdown (as charged, before cashback):")
         for category, amount in sorted(summary['category_breakdown'].items(), 
                                       key=lambda x: x[1], reverse=True):
             print(f"  {category}: ${amount:.2f}")
